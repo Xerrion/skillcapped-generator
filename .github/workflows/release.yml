@@ -44,27 +44,22 @@ jobs:
         targets: ${{ matrix.target }}
 
     - name: Cache cargo registry
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Cache cargo index
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Cache cargo build
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-
-    - name: Install winresource dependencies (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        # winresource is already in Cargo.toml build-dependencies
 
     - name: Build release
       run: cargo build --release --target ${{ matrix.target }}
@@ -80,11 +75,10 @@ jobs:
         fi
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.asset_name }}
         path: ${{ matrix.asset_name }}
-
   release:
     name: Create Release
     needs: build
@@ -96,16 +90,13 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: SkillCapped Generator ${{ github.ref }}
+        tag: ${{ github.ref_name }}
+        name: SkillCapped Generator ${{ github.ref_name }}
         body: |
           ## SkillCapped Generator Release
 
@@ -129,35 +120,10 @@ jobs:
           4. Use Tab to switch versions, Ctrl+C to copy codes
 
           **Made by Xerrion** - [GitHub](https://github.com/Xerrion)
+        artifacts: |
+          skillcapped-generator-windows-x64.exe/skillcapped-generator-windows-x64.exe
+          skillcapped-generator-linux-x64/skillcapped-generator-linux-x64
+          skillcapped-generator-macos-x64/skillcapped-generator-macos-x64
         draft: false
         prerelease: false
-
-    - name: Upload Windows Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: skillcapped-generator-windows-x64.exe/skillcapped-generator-windows-x64.exe
-        asset_name: skillcapped-generator-windows-x64.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload Linux Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: skillcapped-generator-linux-x64/skillcapped-generator-linux-x64
-        asset_name: skillcapped-generator-linux-x64
-        asset_content_type: application/octet-stream
-
-    - name: Upload macOS Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: skillcapped-generator-macos-x64/skillcapped-generator-macos-x64
-        asset_name: skillcapped-generator-macos-x64
-        asset_content_type: application/octet-stream
+        token: ${{ secrets.GITHUB_TOKEN }}
