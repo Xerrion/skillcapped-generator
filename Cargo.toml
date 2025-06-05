@@ -1,0 +1,26 @@
+[package]
+name = "skillcapped-generator"
+version = "1.0.0"
+edition = "2024"
+authors = ["Xerrion <https://github.com/Xerrion>"]
+description = "SkillCapped Unlock Code Generator - A terminal-based tool for generating unlock codes for SkillCapped with Battle.net ID validation"
+license = "MIT"
+homepage = "https://github.com/Xerrion/skillcapped-generator"
+repository = "https://github.com/Xerrion/skillcapped-generator"
+readme = "README.md"
+keywords = ["skillcapped", "battlenet", "unlock-code", "tui", "terminal"]
+categories = ["command-line-utilities", "games"]
+build = "build.rs"
+
+[[bin]]
+name = "skillcapped-generator"
+path = "src/main.rs"
+
+[dependencies]
+base64 = "0.22.1"
+crossterm = "0.29.0"
+ratatui = "0.26.0"
+arboard = "3.4.0"
+
+[build-dependencies]
+winresource = "0.1"

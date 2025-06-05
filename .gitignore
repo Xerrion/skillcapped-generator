@@ -1,0 +1,20 @@
+# Rust build artifacts
+/target/
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Release artifacts
+*.zip
+*.tar.gz
