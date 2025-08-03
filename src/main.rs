@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     restore_terminal(&mut terminal)?;
 
     if let Err(err) = res {
-        println!("Error: {:?}", err);
+        println!("Error: {err:?}");
     }
 
     Ok(())
