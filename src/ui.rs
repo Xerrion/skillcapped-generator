@@ -9,7 +9,7 @@ use ratatui::{
 use std::time::Duration;
 
 pub fn draw_ui(f: &mut Frame, app: &App) {
-    let size = f.size();
+    let size = f.area();
 
     let layout = Layout::default()
         .direction(Direction::Vertical)
