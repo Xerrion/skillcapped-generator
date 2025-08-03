@@ -242,7 +242,7 @@ fn get_code_info(app: &App) -> (String, &'static str, Color) {
         let code = app
             .generate_code()
             .unwrap_or_else(|_| "Invalid version".to_string());
-        
+
         let title = match app.copy_feedback {
             Some(copy_time) if copy_time.elapsed() < Duration::from_secs(2) => {
                 "🎉 Unlock Code (Copied to clipboard!)"
@@ -250,7 +250,7 @@ fn get_code_info(app: &App) -> (String, &'static str, Color) {
             Some(_) => "🔑 Unlock Code (Ctrl+C to copy)",
             None => "🔑 Unlock Code (Ctrl+C to copy)",
         };
-        
+
         (code, title, Color::Green)
     } else {
         (

@@ -65,7 +65,7 @@ fn handle_paste_battlenet_id(app: &mut App) {
     let Ok(mut clipboard) = Clipboard::new() else {
         return;
     };
-    
+
     let Ok(clipboard_text) = clipboard.get_text() else {
         return;
     };
