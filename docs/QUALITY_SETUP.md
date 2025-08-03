@@ -71,12 +71,45 @@ This document explains how to set up Codecov and SonarQube integration for the S
 
 The GitHub Actions workflow includes:
 
-1. **Test Suite**: Runs on multiple OS/Rust versions
-2. **Coverage Generation**: Uses `cargo-llvm-cov` for accurate coverage
+1. **Test Suite**: Fast parallel testing with nextest on multiple OS/Rust versions
+2. **Coverage Generation**: Uses `cargo-llvm-cov` with nextest for accurate coverage including doctests
 3. **Codecov Upload**: Automatic coverage reporting
 4. **SonarQube Analysis**: Code quality and security analysis
 5. **Security Audit**: Dependency vulnerability scanning
 6. **MSRV Check**: Minimum Supported Rust Version validation
+
+### Nextest Integration
+
+The project uses [`cargo-nextest`](https://nexte.st/) for faster and more reliable test execution:
+
+- **Parallel Execution**: Tests run in parallel with optimal thread utilization
+- **Flaky Test Handling**: Automatic retries for unstable tests
+- **Rich Output**: Better test result reporting and failure diagnostics
+- **CI Optimization**: Separate profiles for local development and CI
+- **JUnit Reports**: XML output for integration with CI/CD systems
+- **Coverage Integration**: Seamless integration with llvm-cov for comprehensive coverage
+
+Nextest profiles (configured in `.config/nextest.toml`):
+- **default**: Local development with num-cpus threads and 2 retries for flaky tests
+- **ci**: CI-optimized with 4 threads, fail-fast disabled, and comprehensive output
+- **coverage**: Single-threaded execution with no retries for consistent coverage collection
+
+### Smart Caching with rust-cache
+
+The workflows use [`Swatinem/rust-cache`](https://github.com/Swatinem/rust-cache) for intelligent caching:
+
+- **Automatic Cache Keys**: Based on Rust version, OS, and dependency changes
+- **Selective Caching**: Only caches dependencies, not workspace crates
+- **Cache Cleaning**: Removes unused dependencies and old artifacts
+- **Cross-Job Sharing**: Shared cache keys for similar build configurations
+- **Master-Only Saves**: Main caches only saved from master branch to prevent pollution
+
+Cache configuration per job:
+- **Test Suite**: OS and Rust version specific keys
+- **Coverage**: Shared cache key for consistent coverage builds  
+- **Security**: Tool-only caching (no build artifacts)
+- **MSRV**: Nightly-specific cache (restore-only to avoid daily invalidation)
+- **Release**: Target-specific caching for cross-compilation
 
 ## Branch Protection
 
