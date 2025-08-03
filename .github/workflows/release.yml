@@ -48,24 +48,21 @@ jobs:
         targets: ${{ matrix.target }}
         toolchain: nightly
 
-    - name: Cache cargo registry
-      uses: actions/cache@v4
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
+        # Cache key differentiated by OS and target
+        key: ${{ matrix.os }}-${{ matrix.target }}
+        # Save cache on all release builds
+        cache-all-crates: true
 
-    - name: Cache cargo build
-      uses: actions/cache@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
       with:
-        path: target/
-        key: ${{ runner.os }}-cargo-build-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-${{ matrix.target }}-
+        tool: nextest
+
+    - name: Run tests before release
+      run: cargo nextest run --profile ci --target ${{ matrix.target }}
 
     - name: Build release
       run: cargo build --release --target ${{ matrix.target }}

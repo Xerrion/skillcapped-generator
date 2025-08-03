@@ -36,25 +36,20 @@ jobs:
         toolchain: ${{ matrix.rust-version }}
         components: rustfmt, clippy
 
-    - name: Cache cargo registry
-      uses: actions/cache@v4
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
+        # Cache key differentiated by OS and Rust version
+        key: ${{ matrix.os }}-${{ matrix.rust-version }}
+        # Only save cache on master branch to avoid cache pollution
+        save-if: ${{ github.ref == 'refs/heads/master' }}
+        # Cache all tooling crates (useful for cargo-llvm-cov, etc.)
+        cache-all-crates: true
 
-    - name: Cache cargo build
-      uses: actions/cache@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
       with:
-        path: target/
-        key: ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-${{ matrix.rust-version }}-
-          ${{ runner.os }}-cargo-build-
+        tool: nextest
 
     - name: Check formatting
       run: cargo fmt --all -- --check
@@ -62,11 +57,8 @@ jobs:
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
 
-    - name: Run tests
-      run: cargo test --verbose --all-features
-
-    - name: Run integration tests
-      run: cargo test --test integration_tests --verbose
+    - name: Run tests with nextest
+      run: cargo nextest run --profile ci --verbose --all-features
 
     - name: Build release
       run: cargo build --release
@@ -93,7 +85,7 @@ jobs:
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@v1
       with:
-        toolchain: stable
+        toolchain: nightly
         components: llvm-tools-preview
 
     - name: Install cargo-llvm-cov
@@ -101,20 +93,24 @@ jobs:
       with:
         tool: cargo-llvm-cov
 
-    - name: Cache cargo registry
-      uses: actions/cache@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
       with:
-        path: |
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ubuntu-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ubuntu-cargo-
+        tool: nextest
 
-    - name: Generate Coverage Report
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        # Shared cache key for coverage builds
+        shared-key: "coverage"
+        # Save cache on all runs since coverage is important
+        cache-all-crates: true
+
+    - name: Generate Coverage Report (including doctests)
       run: |
-        cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+        cargo llvm-cov --no-report nextest --profile coverage --all-features --workspace
+        cargo llvm-cov --no-report --doc --all-features --workspace
+        cargo llvm-cov report --doctests --lcov --output-path lcov.info
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -165,6 +161,14 @@ jobs:
       with:
         toolchain: stable
 
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        # Shared cache for security audit tools
+        shared-key: "security"
+        # Only cache tooling, not build artifacts
+        cache-targets: false
+
     - name: Install cargo-audit
       uses: taiki-e/install-action@v2
       with:
@@ -186,14 +190,13 @@ jobs:
       with:
         toolchain: nightly
 
-    - name: Cache cargo registry
-      uses: actions/cache@v4
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: msrv-cargo-${{ hashFiles('**/Cargo.lock') }}
+        # Separate cache for nightly builds
+        shared-key: "msrv-nightly"
+        # Don't save nightly caches as they change daily
+        save-if: "false"
 
     - name: Check MSRV compatibility
       run: cargo check --all-features --all-targets
