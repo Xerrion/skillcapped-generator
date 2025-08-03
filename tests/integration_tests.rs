@@ -1,6 +1,6 @@
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
-use ratatui::{backend::TestBackend, Terminal};
+use ratatui::{Terminal, backend::TestBackend};
 use skillcapped_generator::{app::App, input::handle_key_event, ui::draw_ui};
 
 fn create_key_event(code: KeyCode, modifiers: KeyModifiers) -> KeyEvent {

@@ -1,4 +1,4 @@
-use ratatui::{backend::TestBackend, Terminal};
+use ratatui::{Terminal, backend::TestBackend};
 use skillcapped_generator::{app::App, ui::draw_ui};
 use std::time::Instant;
 

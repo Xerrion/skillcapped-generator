@@ -145,7 +145,7 @@ fn test_validate_code() {
     assert!(!app.validate_code("invalid_base64!@#"));
 
     // Test with valid base64 but wrong content
-    use base64::{engine::general_purpose, Engine as _};
+    use base64::{Engine as _, engine::general_purpose};
     let wrong_content = general_purpose::STANDARD.encode("wrong_content");
     assert!(!app.validate_code(&wrong_content));
 }
