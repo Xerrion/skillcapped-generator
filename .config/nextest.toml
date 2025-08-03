@@ -1,0 +1,43 @@
+[profile.default]
+# Run tests in parallel with optimal thread count
+test-threads = "num-cpus"
+
+# Retry flaky tests up to 2 times
+retries = 2
+
+# Timeout for individual tests (30 seconds)
+slow-timeout = "30s"
+
+# Show test output for failed tests immediately
+failure-output = "immediate"
+
+[profile.ci]
+# CI-specific profile with more conservative settings
+# Do not cancel the test run on the first failure
+fail-fast = false
+
+# Use fewer threads for more stable CI runs
+test-threads = 4
+
+# Single retry for CI to avoid masking real issues
+retries = 1
+
+# Longer timeout for potentially slower CI environments
+slow-timeout = "60s"
+
+# Show comprehensive output for failed tests
+failure-output = "immediate-final"
+
+[profile.coverage]
+# Profile optimized for coverage collection
+# Single-threaded for consistent coverage data
+test-threads = 1
+
+# No retries during coverage to avoid double-counting
+retries = 0
+
+# Standard timeout for coverage runs
+slow-timeout = "30s"
+
+# Immediate output for debugging coverage issues
+failure-output = "immediate"
