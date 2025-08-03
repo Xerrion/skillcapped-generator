@@ -1,5 +1,11 @@
 # SkillCapped Generator
 
+[![Tests](https://github.com/Xerrion/skillcapped-generator/actions/workflows/tests.yml/badge.svg)](https://github.com/Xerrion/skillcapped-generator/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/Xerrion/skillcapped-generator/branch/master/graph/badge.svg)](https://codecov.io/gh/Xerrion/skillcapped-generator)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Xerrion_skillcapped-generator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Xerrion_skillcapped-generator)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Xerrion_skillcapped-generator&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Xerrion_skillcapped-generator)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Xerrion_skillcapped-generator&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Xerrion_skillcapped-generator)
+
 A modern terminal-based unlock code generator for SkillCapped with beautiful UI and Battle.net ID validation.
 
 ## Features
@@ -40,6 +46,10 @@ A modern terminal-based unlock code generator for SkillCapped with beautiful UI 
 ## Installation
 
 Download the latest release from GitHub or build from source with Rust/Cargo.
+
+## Development
+
+For information about setting up code quality tools (Codecov and SonarQube), see [docs/QUALITY_SETUP.md](docs/QUALITY_SETUP.md).
 
 ## Author
 
