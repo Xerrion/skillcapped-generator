@@ -1,4 +1,4 @@
-use ratatui::{Terminal, backend::CrosstermBackend, backend::TestBackend};
+use ratatui::{backend::CrosstermBackend, backend::TestBackend, Terminal};
 use skillcapped_generator::{
     app::App,
     terminal::{restore_terminal, run_app, setup_terminal, update_copy_feedback},
