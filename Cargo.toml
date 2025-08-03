@@ -1,6 +1,6 @@
 [package]
 name = "skillcapped-generator"
-version = "2.0.1"
+version = "2.1.0"
 edition = "2021"
 authors = ["Xerrion <https://github.com/Xerrion>"]
 description = "SkillCapped Unlock Code Generator - A terminal-based tool for generating unlock codes for SkillCapped with Battle.net ID validation"

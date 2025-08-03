@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-08-03
+
+### Changed
+- Reduced cyclomatic complexity across multiple modules for better maintainability
+- Refactored `app.rs` validation and code generation functions using functional programming patterns
+- Simplified event handling logic in `input.rs` with cleaner control flow
+- Improved UI styling functions in `ui.rs` using pattern matching instead of nested conditionals
+- Enhanced terminal event processing in `terminal.rs` with more functional approaches
+- Extracted magic numbers into named constants for better code clarity
+- Replaced platform-specific conditional compilation with runtime detection
+
+### Technical Improvements
+- Applied functional programming principles using `map`, `filter`, `and_then` operations
+- Reduced nested conditionals and branching complexity
+- Improved code readability and maintainability
+- Enhanced separation of concerns with smaller, focused functions
+
 ## [2.0.1] - 2025-08-03
 
 ### Added
@@ -52,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version switching between retail and classic WoW
 - Real-time input validation and feedback
 
-[unreleased]: https://github.com/Xerrion/skillcapped-generator/compare/v2.0.1...HEAD
+[unreleased]: https://github.com/Xerrion/skillcapped-generator/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/Xerrion/skillcapped-generator/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/Xerrion/skillcapped-generator/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Xerrion/skillcapped-generator/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/Xerrion/skillcapped-generator/releases/tag/v1.0.0
