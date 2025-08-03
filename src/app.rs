@@ -118,8 +118,8 @@ impl App {
             .into_iter()
             .flat_map(|config| {
                 vec![
-                    format!("{}{}", battlenet_lower, config),
-                    format!("{}{}", self.battlenet_id, config),
+                    format!("{battlenet_lower}{config}"),
+                    format!("{}{config}", self.battlenet_id),
                 ]
             })
             .collect()
@@ -169,6 +169,6 @@ impl App {
     fn build_wa_config(&self, part1: &[u8], part2: &[u8]) -> String {
         let part1_str: String = part1.iter().map(|&c| c as char).collect();
         let part2_str: String = part2.iter().map(|&c| c as char).collect();
-        format!("{}{}", part1_str, part2_str)
+        format!("{part1_str}{part2_str}")
     }
 }
