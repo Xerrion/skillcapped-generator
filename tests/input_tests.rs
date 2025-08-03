@@ -215,19 +215,19 @@ fn test_handle_copy_code_valid_id() {
 #[test]
 fn test_special_key_combinations() {
     let mut app = App::new();
-    
+
     // Test Ctrl+Shift+C (should not trigger copy)
     let key = create_key_event(
-        KeyCode::Char('c'), 
-        KeyModifiers::CONTROL | KeyModifiers::SHIFT
+        KeyCode::Char('c'),
+        KeyModifiers::CONTROL | KeyModifiers::SHIFT,
     );
     let should_quit = handle_key_event(&mut app, key);
     assert!(!should_quit);
-    
+
     // Test Ctrl+Alt+V (should not trigger paste)
     let key = create_key_event(
-        KeyCode::Char('v'), 
-        KeyModifiers::CONTROL | KeyModifiers::ALT
+        KeyCode::Char('v'),
+        KeyModifiers::CONTROL | KeyModifiers::ALT,
     );
     let should_quit = handle_key_event(&mut app, key);
     assert!(!should_quit);
@@ -239,10 +239,10 @@ fn test_paste_functionality_behavior() {
     app.battlenet_id = "ExistingData".to_string();
     app.use_lowercase = true;
     app.version = "classic".to_string();
-    
+
     let key = create_key_event(KeyCode::Char('v'), KeyModifiers::CONTROL);
     let should_quit = handle_key_event(&mut app, key);
-    
+
     assert!(!should_quit);
     // Paste should reset input (clear existing data)
     // but preserve other settings like use_lowercase and version
@@ -253,7 +253,7 @@ fn test_paste_functionality_behavior() {
 #[test]
 fn test_various_key_codes() {
     let mut app = App::new();
-    
+
     // Test other key codes that should be ignored
     let keys_to_ignore = vec![
         KeyCode::Home,
@@ -268,7 +268,7 @@ fn test_various_key_codes() {
         KeyCode::Left,
         KeyCode::Right,
     ];
-    
+
     for key_code in keys_to_ignore {
         let key = create_key_event(key_code, KeyModifiers::empty());
         let should_quit = handle_key_event(&mut app, key);
@@ -281,10 +281,10 @@ fn test_various_key_codes() {
 #[test]
 fn test_character_input_comprehensive() {
     let mut app = App::new();
-    
+
     // Test various characters
     let chars = vec!['a', 'Z', '1', '#', '_', '-', ' '];
-    
+
     for c in chars {
         app.reset_input();
         let key = create_key_event(KeyCode::Char(c), KeyModifiers::empty());
@@ -297,7 +297,7 @@ fn test_character_input_comprehensive() {
 #[test]
 fn test_multiple_key_sequence() {
     let mut app = App::new();
-    
+
     // Simulate typing a Battle.net ID
     let sequence = "TestUser#1234";
     for c in sequence.chars() {
@@ -305,16 +305,16 @@ fn test_multiple_key_sequence() {
         let should_quit = handle_key_event(&mut app, key);
         assert!(!should_quit);
     }
-    
+
     assert_eq!(app.battlenet_id, sequence);
-    
+
     // Test backspace sequence
     for _ in 0..4 {
         let key = create_key_event(KeyCode::Backspace, KeyModifiers::empty());
         let should_quit = handle_key_event(&mut app, key);
         assert!(!should_quit);
     }
-    
+
     assert_eq!(app.battlenet_id, "TestUser#");
 }
 
@@ -324,24 +324,24 @@ fn test_reset_and_toggle_combinations() {
     app.battlenet_id = "Test#1234".to_string();
     app.use_lowercase = false;
     app.version = "retail".to_string();
-    
+
     // Test escape reset
     let key = create_key_event(KeyCode::Esc, KeyModifiers::empty());
     let should_quit = handle_key_event(&mut app, key);
     assert!(!should_quit);
     assert_eq!(app.battlenet_id, "");
-    
+
     // Test enter toggle
     let key = create_key_event(KeyCode::Enter, KeyModifiers::empty());
     let should_quit = handle_key_event(&mut app, key);
     assert!(!should_quit);
     assert!(app.use_lowercase);
-    
+
     // Test another enter toggle
     let should_quit = handle_key_event(&mut app, key);
     assert!(!should_quit);
     assert!(!app.use_lowercase);
-    
+
     // Test tab version toggle
     let key = create_key_event(KeyCode::Tab, KeyModifiers::empty());
     let should_quit = handle_key_event(&mut app, key);
