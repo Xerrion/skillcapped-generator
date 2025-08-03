@@ -216,9 +216,9 @@ fn get_input_styling(app: &App) -> (Style, Color, &'static str) {
 fn create_version_span<'a>(name: &'a str, current_version: &str, version_key: &str) -> Span<'a> {
     let is_current = current_version == version_key;
     let text = if is_current {
-        format!("● {} ●", name)
+        format!("● {name} ●")
     } else {
-        format!("  {}  ", name)
+        format!("  {name}  ")
     };
 
     Span::styled(
@@ -242,15 +242,15 @@ fn get_code_info(app: &App) -> (String, &'static str, Color) {
         let code = app
             .generate_code()
             .unwrap_or_else(|_| "Invalid version".to_string());
-        let title = if let Some(copy_time) = app.copy_feedback {
-            if copy_time.elapsed() < Duration::from_secs(2) {
+        
+        let title = match app.copy_feedback {
+            Some(copy_time) if copy_time.elapsed() < Duration::from_secs(2) => {
                 "🎉 Unlock Code (Copied to clipboard!)"
-            } else {
-                "🔑 Unlock Code (Ctrl+C to copy)"
             }
-        } else {
-            "🔑 Unlock Code (Ctrl+C to copy)"
+            Some(_) => "🔑 Unlock Code (Ctrl+C to copy)",
+            None => "🔑 Unlock Code (Ctrl+C to copy)",
         };
+        
         (code, title, Color::Green)
     } else {
         (

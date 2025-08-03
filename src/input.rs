@@ -44,32 +44,42 @@ fn has_modifiers(key: &KeyEvent) -> bool {
 }
 
 fn handle_copy_code(app: &mut App) {
-    if app.is_valid_battlenet_id() {
-        if let Ok(unlock_code) = app.generate_code() {
-            if let Ok(mut clipboard) = Clipboard::new() {
-                if clipboard.set_text(unlock_code).is_ok() {
-                    app.copy_feedback = Some(Instant::now());
-                }
-            }
-        }
+    if !app.is_valid_battlenet_id() {
+        return;
+    }
+
+    let Ok(unlock_code) = app.generate_code() else {
+        return;
+    };
+
+    let Ok(mut clipboard) = Clipboard::new() else {
+        return;
+    };
+
+    if clipboard.set_text(unlock_code).is_ok() {
+        app.copy_feedback = Some(Instant::now());
     }
 }
 
 fn handle_paste_battlenet_id(app: &mut App) {
-    if let Ok(mut clipboard) = Clipboard::new() {
-        if let Ok(clipboard_text) = clipboard.get_text() {
-            // Clear current input and set to clipboard content
-            app.reset_input();
+    let Ok(mut clipboard) = Clipboard::new() else {
+        return;
+    };
+    
+    let Ok(clipboard_text) = clipboard.get_text() else {
+        return;
+    };
 
-            // Add each character from clipboard
-            for c in clipboard_text.chars() {
-                app.add_char(c);
-            }
+    // Clear current input and set to clipboard content
+    app.reset_input();
 
-            // Sanitize the pasted input
-            app.sanitize_input();
-        }
+    // Add each character from clipboard
+    for c in clipboard_text.chars() {
+        app.add_char(c);
     }
+
+    // Sanitize the pasted input
+    app.sanitize_input();
 }
 
 fn open_github_link() {

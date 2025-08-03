@@ -127,8 +127,8 @@ impl App {
             .collect();
 
         match general_purpose::STANDARD.decode(&cleaned) {
-            Ok(bytes) => String::from_utf8(bytes).map_err(|e| format!("UTF-8 decode error: {}", e)),
-            Err(e) => Err(format!("Base64 decode error: {}", e)),
+            Ok(bytes) => String::from_utf8(bytes).map_err(|e| format!("UTF-8 decode error: {e}")),
+            Err(e) => Err(format!("Base64 decode error: {e}")),
         }
     }
 
@@ -141,7 +141,7 @@ impl App {
             .into_iter()
             .map(|c| c as u8 as char)
             .collect();
-        let wa4 = format!("{}{}", wa4_part1, wa4_part2);
+        let wa4 = format!("{wa4_part1}{wa4_part2}");
 
         let wa5_part1: String = vec![118, 114, 105, 100, 116, 99]
             .into_iter()
@@ -151,7 +151,7 @@ impl App {
             .into_iter()
             .map(|c| c as u8 as char)
             .collect();
-        let wa5 = format!("{}{}", wa5_part1, wa5_part2);
+        let wa5 = format!("{wa5_part1}{wa5_part2}");
 
         (wa4, wa5)
     }

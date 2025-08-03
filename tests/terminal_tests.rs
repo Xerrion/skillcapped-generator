@@ -5,6 +5,10 @@ use skillcapped_generator::{
 };
 use std::time::{Duration, Instant};
 
+type TerminalType = Terminal<CrosstermBackend<std::io::Stdout>>;
+type TerminalResult = Result<TerminalType, Box<dyn std::error::Error>>;
+type RestoreResult = Result<(), Box<dyn std::error::Error>>;
+
 #[test]
 fn test_setup_and_restore_terminal() {
     // Note: This test might fail in CI environments without a proper terminal
@@ -15,13 +19,8 @@ fn test_setup_and_restore_terminal() {
     // and have the correct signatures
 
     // This is more of a compilation test
-    let _setup_fn: fn() -> Result<
-        Terminal<CrosstermBackend<std::io::Stdout>>,
-        Box<dyn std::error::Error>,
-    > = setup_terminal;
-    let _restore_fn: fn(
-        &mut Terminal<CrosstermBackend<std::io::Stdout>>,
-    ) -> Result<(), Box<dyn std::error::Error>> = restore_terminal;
+    let _setup_fn: fn() -> TerminalResult = setup_terminal;
+    let _restore_fn: fn(&mut TerminalType) -> RestoreResult = restore_terminal;
 }
 
 #[test]

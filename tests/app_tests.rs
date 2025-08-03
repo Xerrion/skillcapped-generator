@@ -4,7 +4,7 @@ use skillcapped_generator::app::App;
 fn test_new_app() {
     let app = App::new();
     assert_eq!(app.battlenet_id, "");
-    assert_eq!(app.use_lowercase, false);
+    assert!(!app.use_lowercase);
     assert_eq!(app.version, "retail");
     assert!(app.copy_feedback.is_none());
 }

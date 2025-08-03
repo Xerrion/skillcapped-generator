@@ -69,9 +69,9 @@ pub fn restore_terminal(
 }
 
 pub fn update_copy_feedback(app: &mut App) {
-    if let Some(copy_instant) = app.copy_feedback {
-        if Instant::now().duration_since(copy_instant).as_secs() >= 1 {
-            app.copy_feedback = None;
-        }
+    if let Some(copy_instant) = app.copy_feedback
+        && Instant::now().duration_since(copy_instant).as_secs() >= 1
+    {
+        app.copy_feedback = None;
     }
 }
