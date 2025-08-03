@@ -111,6 +111,14 @@ jobs:
         cargo llvm-cov --no-report nextest --profile coverage --all-features --workspace
         cargo llvm-cov --no-report --doc --all-features --workspace
         cargo llvm-cov report --doctests --lcov --output-path lcov.info
+        
+        # Fix absolute paths in LCOV file to be relative to project root
+        sed -i "s|$PWD/||g" lcov.info
+        
+        # Verify the LCOV file was generated and contains data
+        echo "LCOV file size: $(wc -l < lcov.info) lines"
+        echo "First few lines of LCOV file:"
+        head -10 lcov.info
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -142,6 +150,22 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: coverage-reports
+        path: .
+
+    - name: Verify coverage file exists
+      run: |
+        if [ -f lcov.info ]; then
+          echo "✅ Coverage file found: lcov.info"
+          echo "📊 LCOV file size: $(wc -l < lcov.info) lines"
+          echo "📁 First few source file entries:"
+          grep "^SF:" lcov.info | head -5
+          echo "📈 Coverage summary:"
+          grep "^LH:\|^LF:" lcov.info | tail -10
+        else
+          echo "❌ lcov.info not found!"
+          ls -la *.info || echo "No .info files found"
+          exit 1
+        fi
 
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v5
