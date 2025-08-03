@@ -19,7 +19,7 @@ fn main() {
         if let Err(e) = res.compile() {
             // Don't fail the build if icon is missing, just print a warning
             if !e.to_string().contains("icon.ico") {
-                panic!("Failed to compile resources: {}", e);
+                panic!("Failed to compile resources: {e}");
             } else {
                 println!("cargo:warning=Icon file not found, building without icon");
             }
