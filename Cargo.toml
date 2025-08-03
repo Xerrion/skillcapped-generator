@@ -16,6 +16,10 @@ build = "build.rs"
 name = "skillcapped-generator"
 path = "src/main.rs"
 
+[lib]
+name = "skillcapped_generator"
+path = "src/lib.rs"
+
 [dependencies]
 base64 = "0.22.1"
 crossterm = "0.29.0"
