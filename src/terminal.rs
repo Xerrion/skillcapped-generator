@@ -19,34 +19,38 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     app.reset_input();
 
     loop {
-        // Sanitize input before displaying
-        app.sanitize_input();
-
-        // Draw the UI
-        terminal.draw(|f| draw_ui(f, &app))?;
-
-        // Handle events
-        if event::poll(Duration::from_millis(200))? {
-            match event::read()? {
-                Event::Key(key) => {
-                    // Only handle key press events
-                    if key.kind != KeyEventKind::Press {
-                        continue;
-                    }
-
-                    if handle_key_event(&mut app, key) {
-                        return Ok(()); // Quit signal received
-                    }
-                }
-                Event::Mouse(_) => {
-                    // Ignore mouse events
-                }
-                _ => {}
-            }
+        if handle_app_iteration(terminal, &mut app)? {
+            return Ok(());
         }
 
-        // Update copy feedback
         update_copy_feedback(&mut app);
+    }
+}
+
+fn handle_app_iteration<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<bool> {
+    // Sanitize input before displaying
+    app.sanitize_input();
+
+    // Draw the UI
+    terminal.draw(|f| draw_ui(f, app))?;
+
+    // Handle events
+    if event::poll(Duration::from_millis(200))? {
+        if let Some(should_quit) = handle_event(app)? {
+            return Ok(should_quit);
+        }
+    }
+
+    Ok(false)
+}
+
+fn handle_event(app: &mut App) -> io::Result<Option<bool>> {
+    let event = event::read()?;
+
+    match event {
+        Event::Key(key) if key.kind == KeyEventKind::Press => Ok(Some(handle_key_event(app, key))),
+        Event::Mouse(_) => Ok(None), // Ignore mouse events
+        _ => Ok(None),
     }
 }
 
@@ -69,9 +73,7 @@ pub fn restore_terminal(
 }
 
 pub fn update_copy_feedback(app: &mut App) {
-    if let Some(copy_instant) = app.copy_feedback {
-        if Instant::now().duration_since(copy_instant).as_secs() >= 1 {
-            app.copy_feedback = None;
-        }
-    }
+    app.copy_feedback = app
+        .copy_feedback
+        .filter(|&copy_instant| Instant::now().duration_since(copy_instant).as_secs() < 1);
 }

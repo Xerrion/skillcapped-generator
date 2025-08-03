@@ -6,7 +6,7 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 pub fn draw_ui(f: &mut Frame, app: &App) {
     let size = f.area();
@@ -32,37 +32,50 @@ pub fn draw_ui(f: &mut Frame, app: &App) {
 
 fn draw_input_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     let (input_style, input_border_color, status_emoji) = get_input_styling(app);
+    let input_text = get_input_display_text(app);
+    let input_spans = create_input_spans(status_emoji, input_text, input_style);
 
-    let input_text = if app.battlenet_id.is_empty() {
+    f.render_widget(
+        Paragraph::new(Line::from(input_spans)).block(create_input_block(input_border_color)),
+        area,
+    );
+}
+
+fn get_input_display_text(app: &App) -> &str {
+    if app.battlenet_id.is_empty() {
         "Type here... (format: Name#1234)"
     } else {
         &app.battlenet_id
-    };
+    }
+}
 
-    f.render_widget(
-        Paragraph::new(Line::from(vec![
-            Span::styled(status_emoji, Style::default()),
-            Span::styled(
-                " Battle.net ID: ",
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(input_text, input_style.add_modifier(Modifier::BOLD)),
-        ]))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_style(Style::default().fg(input_border_color))
-                .title_style(
-                    Style::default()
-                        .fg(Color::Magenta)
-                        .add_modifier(Modifier::BOLD),
-                )
-                .title("💻 Input"),
+fn create_input_spans<'a>(
+    status_emoji: &'static str,
+    input_text: &'a str,
+    input_style: Style,
+) -> Vec<Span<'a>> {
+    vec![
+        Span::styled(status_emoji, Style::default()),
+        Span::styled(
+            " Battle.net ID: ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
         ),
-        area,
-    );
+        Span::styled(input_text, input_style.add_modifier(Modifier::BOLD)),
+    ]
+}
+
+fn create_input_block(border_color: Color) -> Block<'static> {
+    Block::default()
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(border_color))
+        .title_style(
+            Style::default()
+                .fg(Color::Magenta)
+                .add_modifier(Modifier::BOLD),
+        )
+        .title("💻 Input")
 }
 
 fn draw_version_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
@@ -113,51 +126,10 @@ fn draw_code_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
 }
 
 fn draw_help_section(f: &mut Frame, area: ratatui::layout::Rect) {
-    let help_line = Line::from(vec![
-        Span::styled("⌨️  ", Style::default().fg(Color::Yellow)),
-        Span::styled(
-            "Type/Paste: ",
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled("Enter Battle.net ID", Style::default().fg(Color::Gray)),
-        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled(
-            "Esc: ",
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled("Clear", Style::default().fg(Color::Gray)),
-        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled(
-            "Ctrl+C: ",
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled("Copy", Style::default().fg(Color::Gray)),
-        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled(
-            "Ctrl+V: ",
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled("Paste", Style::default().fg(Color::Gray)),
-        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled(
-            "Ctrl+Q: ",
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled("Quit", Style::default().fg(Color::Gray)),
-    ]);
+    let help_spans = create_help_spans();
 
     f.render_widget(
-        Paragraph::new(help_line).block(
+        Paragraph::new(Line::from(help_spans)).block(
             Block::default()
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Yellow))
@@ -170,6 +142,34 @@ fn draw_help_section(f: &mut Frame, area: ratatui::layout::Rect) {
         ),
         area,
     );
+}
+
+fn create_help_spans() -> Vec<Span<'static>> {
+    let help_items = [
+        ("Type/Paste: ", "Enter Battle.net ID"),
+        ("Esc: ", "Clear"),
+        ("Ctrl+C: ", "Copy"),
+        ("Ctrl+V: ", "Paste"),
+        ("Ctrl+Q: ", "Quit"),
+    ];
+
+    let mut spans = vec![Span::styled("⌨️  ", Style::default().fg(Color::Yellow))];
+
+    for (i, (command, description)) in help_items.iter().enumerate() {
+        if i > 0 {
+            spans.push(Span::styled(" | ", Style::default().fg(Color::DarkGray)));
+        }
+
+        spans.push(Span::styled(
+            *command,
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ));
+        spans.push(Span::styled(*description, Style::default().fg(Color::Gray)));
+    }
+
+    spans
 }
 
 fn draw_footer_section(f: &mut Frame, area: ratatui::layout::Rect) {
@@ -204,12 +204,10 @@ fn draw_footer_section(f: &mut Frame, area: ratatui::layout::Rect) {
 }
 
 fn get_input_styling(app: &App) -> (Style, Color, &'static str) {
-    if app.battlenet_id.is_empty() {
-        (Style::default().fg(Color::Cyan), Color::Cyan, "💭")
-    } else if app.is_valid_battlenet_id() {
-        (Style::default().fg(Color::Green), Color::Green, "✅")
-    } else {
-        (Style::default().fg(Color::Red), Color::Red, "❌")
+    match (app.battlenet_id.is_empty(), app.is_valid_battlenet_id()) {
+        (true, _) => (Style::default().fg(Color::Cyan), Color::Cyan, "💭"),
+        (false, true) => (Style::default().fg(Color::Green), Color::Green, "✅"),
+        (false, false) => (Style::default().fg(Color::Red), Color::Red, "❌"),
     }
 }
 
@@ -238,25 +236,32 @@ fn create_version_span<'a>(name: &'a str, current_version: &str, version_key: &s
 }
 
 fn get_code_info(app: &App) -> (String, &'static str, Color) {
-    if app.is_valid_battlenet_id() {
-        let code = app
-            .generate_code()
-            .unwrap_or_else(|_| "Invalid version".to_string());
-
-        let title = match app.copy_feedback {
-            Some(copy_time) if copy_time.elapsed() < Duration::from_secs(2) => {
-                "🎉 Unlock Code (Copied to clipboard!)"
-            }
-            Some(_) => "🔑 Unlock Code (Ctrl+C to copy)",
-            None => "🔑 Unlock Code (Ctrl+C to copy)",
-        };
-
-        (code, title, Color::Green)
-    } else {
-        (
-            "⚠️  Enter a valid Battle.net ID to generate unlock code".to_string(),
-            "🔑 Unlock Code",
-            Color::Yellow,
-        )
+    match app.is_valid_battlenet_id() {
+        true => get_valid_code_info(app),
+        false => get_invalid_code_info(),
     }
+}
+
+fn get_valid_code_info(app: &App) -> (String, &'static str, Color) {
+    let code = app
+        .generate_code()
+        .unwrap_or_else(|_| "Invalid version".to_string());
+
+    let title = get_copy_feedback_title(app.copy_feedback);
+    (code, title, Color::Green)
+}
+
+fn get_invalid_code_info() -> (String, &'static str, Color) {
+    (
+        "⚠️  Enter a valid Battle.net ID to generate unlock code".to_string(),
+        "🔑 Unlock Code",
+        Color::Yellow,
+    )
+}
+
+fn get_copy_feedback_title(copy_feedback: Option<Instant>) -> &'static str {
+    copy_feedback
+        .filter(|&copy_time| copy_time.elapsed() < Duration::from_secs(2))
+        .map(|_| "🎉 Unlock Code (Copied to clipboard!)")
+        .unwrap_or("🔑 Unlock Code (Ctrl+C to copy)")
 }
