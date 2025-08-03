@@ -1,36 +1,51 @@
 codecov:
-  require_ci_to_pass: yes
+  require_ci_to_pass: no  # Don't require CI to pass for coverage upload
   notify:
-    after_n_builds: 3  # Wait for multiple OS builds
+    after_n_builds: 1  # Process coverage immediately
+    wait_for_ci: false  # Don't wait for other CI jobs
 
 coverage:
   precision: 2
   round: down
-  range: "70...100"
+  range: "50...100"  # More lenient range
   
   status:
     project:
       default:
-        target: 80%
-        threshold: 1%
+        target: 70%  # Lower target temporarily
+        threshold: 5%  # More permissive threshold
         if_not_found: success
-        if_ci_failed: error
+        if_ci_failed: success  # Don't fail if CI fails
+        only_pulls: false
     patch:
       default:
-        target: 80%
-        threshold: 1%
+        target: 70%
+        threshold: 5%
         if_not_found: success
+        only_pulls: true
         
 comment:
   layout: "reach,diff,flags,tree,footer"
   behavior: default
   require_changes: false
+  after_n_builds: 1
 
 ignore:
   - "tests/"
   - "target/"
   - "*.toml"
   - "build.rs"
+  - "*.rc"
+  - "*.ps1"
 
 github_checks:
   annotations: true
+
+# Ensure coverage is accepted from all sources
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no

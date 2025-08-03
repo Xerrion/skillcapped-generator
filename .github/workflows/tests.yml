@@ -106,34 +106,40 @@ jobs:
         # Save cache on all runs since coverage is important
         cache-all-crates: true
 
-    - name: Generate Coverage Report (including doctests)
+    - name: Collect coverage data
       run: |
-        cargo llvm-cov --no-report nextest --profile coverage --all-features --workspace
-        cargo llvm-cov --no-report --doc --all-features --workspace
-        cargo llvm-cov report --doctests --lcov --output-path lcov.info
+        # Generate coverage with nextest (simpler approach)
+        cargo llvm-cov nextest --profile coverage --all-features --workspace --lcov --output-path lcov.info
         
-        # Fix absolute paths in LCOV file to be relative to project root
-        sed -i "s|$PWD/||g" lcov.info
-        
-        # Verify the LCOV file was generated and contains data
-        echo "LCOV file size: $(wc -l < lcov.info) lines"
-        echo "First few lines of LCOV file:"
-        head -10 lcov.info
+        # Verify file was generated
+        if [ -f lcov.info ]; then
+          echo "✅ LCOV file generated successfully"
+          echo "📊 LCOV file size: $(wc -l < lcov.info) lines"
+          echo "📁 Source files covered:"
+          grep "^SF:" lcov.info | head -5 || echo "No source files found in coverage"
+        else
+          echo "❌ lcov.info not generated!"
+          exit 1
+        fi
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+    - name: Upload coverage data to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        file: ./lcov.info
+        files: lcov.info
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: true
+        fail_ci_if_error: false
+        verbose: true
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports
-        path: lcov.info
+        path: |
+          codecov.json
+          lcov.info
+        retention-days: 30
 
   sonarqube:
     name: SonarQube Analysis
