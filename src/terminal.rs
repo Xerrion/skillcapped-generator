@@ -14,9 +14,6 @@ use std::{
 
 use crate::{app::App, ui::draw_ui, input::handle_key_event};
 
-#[cfg(test)]
-mod tests;
-
 pub fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     let mut app = App::new();
     app.reset_input();

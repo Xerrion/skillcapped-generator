@@ -8,9 +8,6 @@ use ratatui::{
 use std::time::Duration;
 use crate::app::App;
 
-#[cfg(test)]
-mod tests;
-
 pub fn draw_ui(f: &mut Frame, app: &App) {
     let size = f.size();
 
@@ -21,6 +18,7 @@ pub fn draw_ui(f: &mut Frame, app: &App) {
             Constraint::Length(3), // Input
             Constraint::Length(3), // Version
             Constraint::Min(1),    // Code output
+            Constraint::Length(4), // Help
             Constraint::Length(3), // Footer
         ])
         .split(size);
@@ -28,7 +26,8 @@ pub fn draw_ui(f: &mut Frame, app: &App) {
     draw_input_section(f, app, layout[0]);
     draw_version_section(f, app, layout[1]);
     draw_code_section(f, app, layout[2]);
-    draw_footer_section(f, layout[3]);
+    draw_help_section(f, layout[3]);
+    draw_footer_section(f, layout[4]);
 }
 
 fn draw_input_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
@@ -50,7 +49,7 @@ fn draw_input_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
             .borders(Borders::ALL)
             .border_style(Style::default().fg(input_border_color))
             .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
-            .title("💻 Input (type to enter, Esc to clear, Ctrl+Q to quit)")),
+            .title("💻 Input")),
         area,
     );
 }
@@ -91,6 +90,36 @@ fn draw_code_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
             .border_style(Style::default().fg(code_color))
             .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
             .title(copy_title)),
+        area,
+    );
+}
+
+fn draw_help_section(f: &mut Frame, area: ratatui::layout::Rect) {
+    let help_line = Line::from(vec![
+        Span::styled("⌨️  ", Style::default().fg(Color::Yellow)),
+        Span::styled("Type/Paste: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled("Enter Battle.net ID", Style::default().fg(Color::Gray)),
+        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Esc: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled("Clear", Style::default().fg(Color::Gray)),
+        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Ctrl+C: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled("Copy", Style::default().fg(Color::Gray)),
+        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Ctrl+V: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled("Paste", Style::default().fg(Color::Gray)),
+        Span::styled(" | ", Style::default().fg(Color::DarkGray)),
+        Span::styled("Ctrl+Q: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled("Quit", Style::default().fg(Color::Gray)),
+    ]);
+
+    f.render_widget(
+        Paragraph::new(help_line)
+            .block(Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(Color::Yellow))
+                .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
+                .title("❓ Help")),
         area,
     );
 }

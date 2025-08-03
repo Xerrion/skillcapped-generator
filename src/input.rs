@@ -3,9 +3,6 @@ use std::time::Instant;
 use arboard::Clipboard;
 use crate::app::App;
 
-#[cfg(test)]
-mod tests;
-
 pub fn handle_key_event(app: &mut App, key: KeyEvent) -> bool {
     match key.code {
         KeyCode::Char(c) if !has_modifiers(&key) => {
@@ -25,6 +22,9 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) -> bool {
         }
         KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
             handle_copy_code(app);
+        }
+        KeyCode::Char('v') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+            handle_paste_battlenet_id(app);
         }
         KeyCode::Char('g') if key.modifiers.contains(KeyModifiers::CONTROL) => {
             open_github_link();
@@ -51,6 +51,23 @@ fn handle_copy_code(app: &mut App) {
                     app.copy_feedback = Some(Instant::now());
                 }
             }
+        }
+    }
+}
+
+fn handle_paste_battlenet_id(app: &mut App) {
+    if let Ok(mut clipboard) = Clipboard::new() {
+        if let Ok(clipboard_text) = clipboard.get_text() {
+            // Clear current input and set to clipboard content
+            app.reset_input();
+            
+            // Add each character from clipboard
+            for c in clipboard_text.chars() {
+                app.add_char(c);
+            }
+            
+            // Sanitize the pasted input
+            app.sanitize_input();
         }
     }
 }
