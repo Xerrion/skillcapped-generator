@@ -93,3 +93,74 @@ fn test_draw_ui_help_section() {
     // Test for help-related content (the help section should contain these)
     assert!(buffer_text.contains("Help") || buffer_text.contains("Ctrl"));
 }
+
+#[test]
+fn test_draw_ui_with_code_generation_error() {
+    let mut app = App::new();
+    app.battlenet_id = "TestUser#1234".to_string();
+    app.version = "invalid_version".to_string(); // This will cause generate_code to fail
+
+    let backend = TestBackend::new(80, 24);
+    let mut terminal = Terminal::new(backend).unwrap();
+
+    terminal
+        .draw(|f| {
+            draw_ui(f, &app);
+        })
+        .unwrap();
+
+    let buffer = terminal.backend().buffer();
+    let content: String = buffer.content.iter().map(|cell| cell.symbol()).collect();
+
+    // Should show "Invalid version" when code generation fails
+    assert!(content.contains("Invalid version"));
+}
+
+#[test]
+fn test_draw_ui_with_expired_copy_feedback() {
+    let mut app = App::new();
+    app.battlenet_id = "TestUser#1234".to_string();
+
+    // Set copy feedback to an old timestamp (more than 2 seconds ago)
+    let old_time = std::time::Instant::now() - std::time::Duration::from_secs(3);
+    app.copy_feedback = Some(old_time);
+
+    let backend = TestBackend::new(80, 24);
+    let mut terminal = Terminal::new(backend).unwrap();
+
+    terminal
+        .draw(|f| {
+            draw_ui(f, &app);
+        })
+        .unwrap();
+
+    let buffer = terminal.backend().buffer();
+    let content: String = buffer.content.iter().map(|cell| cell.symbol()).collect();
+
+    // Should show regular copy message, not the "Copied to clipboard!" message
+    assert!(content.contains("Ctrl+C to copy"));
+    assert!(!content.contains("Copied to clipboard!"));
+}
+
+#[test]
+fn test_create_version_span_inactive() {
+    // Test the version span creation for inactive versions
+    let app = App::new();
+    // App defaults to "retail", so "classic" should be inactive
+
+    let backend = TestBackend::new(80, 24);
+    let mut terminal = Terminal::new(backend).unwrap();
+
+    terminal
+        .draw(|f| {
+            draw_ui(f, &app);
+        })
+        .unwrap();
+
+    let buffer = terminal.backend().buffer();
+    let content: String = buffer.content.iter().map(|cell| cell.symbol()).collect();
+
+    // Should show version information (retail is default, so it should be visible)
+    // The exact text depends on the rendering, so we check for version-related content
+    assert!(content.contains("retail") || content.contains("Version"));
+}

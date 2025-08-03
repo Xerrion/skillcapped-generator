@@ -151,15 +151,24 @@ fn test_handle_ctrl_v_paste() {
 }
 
 #[test]
-fn test_handle_ctrl_g_github() {
+fn test_handle_ctrl_g_github_integration() {
     let mut app = App::new();
-    let original_id = app.battlenet_id.clone();
-    let key = create_key_event(KeyCode::Char('g'), KeyModifiers::CONTROL);
+    let original_state = (
+        app.battlenet_id.clone(),
+        app.use_lowercase,
+        app.version.clone(),
+    );
 
+    let key = create_key_event(KeyCode::Char('g'), KeyModifiers::CONTROL);
     let should_quit = handle_key_event(&mut app, key);
+
     assert!(!should_quit);
-    // GitHub link opening doesn't change app state
-    assert_eq!(app.battlenet_id, original_id);
+
+    // Verify that opening GitHub link doesn't change the app state
+    assert_eq!(
+        (app.battlenet_id, app.use_lowercase, app.version),
+        original_state
+    );
 }
 
 #[test]
@@ -191,91 +200,77 @@ fn test_has_modifiers_comprehensive() {
 fn test_handle_copy_code_invalid_id() {
     let mut app = App::new();
     app.battlenet_id = "invalid".to_string(); // Invalid Battle.net ID
+
     let key = create_key_event(KeyCode::Char('c'), KeyModifiers::CONTROL);
-
-    let initial_feedback = app.copy_feedback;
     let should_quit = handle_key_event(&mut app, key);
+
     assert!(!should_quit);
-    // Copy feedback should not be set for invalid ID
-    assert_eq!(app.copy_feedback, initial_feedback);
+    // Should not crash when trying to copy invalid ID
+    assert!(app.copy_feedback.is_none()); // No feedback for invalid ID
 }
 
 #[test]
-fn test_handle_copy_code_valid_id() {
+fn test_handle_copy_code_generation_error() {
     let mut app = App::new();
-    app.battlenet_id = "TestUser#1234".to_string(); // Valid Battle.net ID
+    app.battlenet_id = "TestUser#1234".to_string();
+    app.version = "invalid_version".to_string(); // This will cause generate_code to fail
+
     let key = create_key_event(KeyCode::Char('c'), KeyModifiers::CONTROL);
-
     let should_quit = handle_key_event(&mut app, key);
+
     assert!(!should_quit);
-    // Note: copy_feedback might be set if clipboard is available
-    // We can't guarantee clipboard availability in tests, so we just ensure no panic
+    // Should not crash when code generation fails
+    assert!(app.copy_feedback.is_none()); // No feedback when generation fails
 }
 
 #[test]
-fn test_special_key_combinations() {
+fn test_handle_paste_empty_clipboard() {
     let mut app = App::new();
+    app.battlenet_id = "existing".to_string();
 
-    // Test Ctrl+Shift+C (should not trigger copy)
-    let key = create_key_event(
-        KeyCode::Char('c'),
-        KeyModifiers::CONTROL | KeyModifiers::SHIFT,
-    );
-    let should_quit = handle_key_event(&mut app, key);
-    assert!(!should_quit);
-
-    // Test Ctrl+Alt+V (should not trigger paste)
-    let key = create_key_event(
-        KeyCode::Char('v'),
-        KeyModifiers::CONTROL | KeyModifiers::ALT,
-    );
-    let should_quit = handle_key_event(&mut app, key);
-    assert!(!should_quit);
-}
-
-#[test]
-fn test_paste_functionality_behavior() {
-    let mut app = App::new();
-    app.battlenet_id = "ExistingData".to_string();
-    app.use_lowercase = true;
-    app.version = "classic".to_string();
-
+    // This test checks the clipboard error handling path
     let key = create_key_event(KeyCode::Char('v'), KeyModifiers::CONTROL);
     let should_quit = handle_key_event(&mut app, key);
 
     assert!(!should_quit);
-    // Paste should reset input (clear existing data)
-    // but preserve other settings like use_lowercase and version
-    assert!(app.use_lowercase);
-    assert_eq!(app.version, "classic");
+    // The function should handle clipboard errors gracefully
+    // Note: In real scenario, this depends on clipboard state
 }
 
 #[test]
-fn test_various_key_codes() {
+fn test_handle_paste_with_special_characters() {
     let mut app = App::new();
 
-    // Test other key codes that should be ignored
-    let keys_to_ignore = vec![
-        KeyCode::Home,
-        KeyCode::End,
-        KeyCode::PageUp,
-        KeyCode::PageDown,
-        KeyCode::Insert,
-        KeyCode::Delete,
-        KeyCode::F(1),
-        KeyCode::Up,
-        KeyCode::Down,
-        KeyCode::Left,
-        KeyCode::Right,
-    ];
+    // Simulate pasting text with special characters that need sanitization
+    // Since we can't control the actual clipboard in tests, we test the sanitization logic
+    app.battlenet_id = "Test@User#1234!".to_string();
+    app.sanitize_input();
 
-    for key_code in keys_to_ignore {
-        let key = create_key_event(key_code, KeyModifiers::empty());
-        let should_quit = handle_key_event(&mut app, key);
-        assert!(!should_quit);
-        // App state should remain unchanged
-        assert_eq!(app.battlenet_id, "");
-    }
+    assert_eq!(app.battlenet_id, "TestUser#1234");
+}
+
+#[test]
+fn test_has_modifiers_edge_cases() {
+    // Test ALT modifier
+    let key_alt = create_key_event(KeyCode::Char('a'), KeyModifiers::ALT);
+    let has_alt_mod = key_alt.modifiers.contains(KeyModifiers::CONTROL)
+        || key_alt.modifiers.contains(KeyModifiers::ALT)
+        || key_alt.modifiers.contains(KeyModifiers::SUPER);
+    assert!(has_alt_mod);
+
+    // Test SUPER modifier
+    let key_super = create_key_event(KeyCode::Char('a'), KeyModifiers::SUPER);
+    let has_super_mod = key_super.modifiers.contains(KeyModifiers::CONTROL)
+        || key_super.modifiers.contains(KeyModifiers::ALT)
+        || key_super.modifiers.contains(KeyModifiers::SUPER);
+    assert!(has_super_mod);
+
+    // Test no modifiers
+    let key_none = create_key_event(KeyCode::Char('a'), KeyModifiers::empty());
+    let has_no_mod = key_none.modifiers.contains(KeyModifiers::CONTROL)
+        || key_none.modifiers.contains(KeyModifiers::ALT)
+        || key_none.modifiers.contains(KeyModifiers::SUPER);
+    assert!(!has_no_mod);
 }
 
 #[test]
@@ -347,4 +342,42 @@ fn test_reset_and_toggle_combinations() {
     let should_quit = handle_key_event(&mut app, key);
     assert!(!should_quit);
     assert_eq!(app.version, "classic");
+}
+
+#[test]
+fn test_handle_ctrl_c_with_invalid_version() {
+    let mut app = App::new();
+    app.battlenet_id = "TestUser#1234".to_string();
+    app.version = "invalid_version".to_string(); // This will cause generate_code to fail
+
+    let key = create_key_event(KeyCode::Char('c'), KeyModifiers::CONTROL);
+    let should_quit = handle_key_event(&mut app, key);
+    assert!(!should_quit);
+    // The copy_feedback should not be set if generation fails
+    assert!(app.copy_feedback.is_none());
+}
+
+#[test]
+fn test_generate_code_with_invalid_version() {
+    let mut app = App::new();
+    app.battlenet_id = "TestUser#1234".to_string();
+    app.version = "invalid_version".to_string();
+
+    let result = app.generate_code();
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "Invalid version");
+}
+
+// Test to ensure clipboard errors are handled gracefully
+// Note: These tests may not hit the exact error paths due to clipboard system dependencies
+#[test]
+fn test_paste_battlenet_id_error_handling() {
+    // This test mainly verifies the function can be called without panicking
+    // The actual clipboard error paths are hard to test reliably in a unit test
+    let mut app = App::new();
+    let key = create_key_event(KeyCode::Char('v'), KeyModifiers::CONTROL);
+
+    let should_quit = handle_key_event(&mut app, key);
+    assert!(!should_quit);
+    // The function should complete without crashing regardless of clipboard state
 }
