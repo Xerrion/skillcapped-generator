@@ -3,29 +3,25 @@ use std::env;
 fn main() {
     // Only build resources on Windows
     if env::var("CARGO_CFG_TARGET_OS").unwrap() == "windows" {
-        let mut res = winresource::WindowsResource::new();
-        // Set executable metadata
-        res.set_version_info(winresource::VersionInfo::PRODUCTVERSION, 0x0001000000000000)
-            .set_version_info(winresource::VersionInfo::FILEVERSION, 0x0001000000000000)
-            .set("CompanyName", "Xerrion")
-            .set("FileDescription", "SkillCapped Unlock Code Generator")
-            .set("InternalName", "skillcapped-generator")
-            .set("LegalCopyright", "© 2025 Xerrion. All rights reserved.")
-            .set("OriginalFilename", "skillcapped-generator.exe")
-            .set("ProductName", "SkillCapped Generator")
-            .set("ProductVersion", "1.0.0");
+        println!("cargo:info=Building Windows resources with embed-resource...");
 
-        // Compile the resource
-        if let Err(e) = res.compile() {
-            // Don't fail the build if icon is missing, just print a warning
-            if !e.to_string().contains("icon.ico") {
-                panic!("Failed to compile resources: {e}");
-            } else {
-                println!("cargo:warning=Icon file not found, building without icon");
-            }
+        if std::path::Path::new("app.rc").exists() {
+            // Use manifest_required() since we have a manifest for Windows compatibility
+            embed_resource::compile("app.rc", embed_resource::NONE)
+                .manifest_required()
+                .unwrap();
+            println!("cargo:info=Successfully compiled resources with embed-resource");
+        } else {
+            println!("cargo:warning=app.rc file not found, building without resources");
         }
+    } else {
+        println!("cargo:info=Not building on Windows, skipping resource compilation");
     }
 
+    // Rebuild triggers - according to embed-resource docs, these are needed
+    // since the crate doesn't generate cargo:rerun-if-changed annotations automatically
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=app.rc");
+    println!("cargo:rerun-if-changed=skillcapped-generator.exe.manifest");
     println!("cargo:rerun-if-changed=icon.ico");
 }
