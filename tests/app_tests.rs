@@ -217,7 +217,7 @@ fn test_decode_import_string_edge_cases() {
 
     // Test decoding with whitespace and special characters (should be filtered)
     let test_input = "SGVsbG8gV29ybGQ="; // "Hello World" in base64
-    let result = app.validate_code(&format!("  {}  !@#", test_input));
+    let result = app.validate_code(&format!("  {test_input}  !@#"));
     // This should not crash and should handle the filtering
     assert!(!result); // It won't match our battlenet_id, but should not panic
 }
