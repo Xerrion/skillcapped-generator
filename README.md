@@ -49,6 +49,22 @@ Download the latest release from GitHub or build from source with Rust/Cargo.
 
 ## Development
 
+### Quick Start
+```bash
+# Install nextest for faster testing
+cargo install cargo-nextest
+
+# Run tests with nextest (uses .config/nextest.toml configuration)
+cargo nextest run
+
+# Run tests with CI profile (for more conservative settings)
+cargo nextest run --profile ci
+
+# Generate coverage report with nextest
+cargo install cargo-llvm-cov
+cargo llvm-cov nextest --profile coverage
+```
+
 For information about setting up code quality tools (Codecov and SonarQube), see [docs/QUALITY_SETUP.md](docs/QUALITY_SETUP.md).
 
 ## Author
