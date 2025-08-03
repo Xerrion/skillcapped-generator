@@ -1,11 +1,11 @@
 use crossterm::{
     event::{self, Event, KeyEventKind},
     execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{
-    Terminal,
     backend::{Backend, CrosstermBackend},
+    Terminal,
 };
 use std::{
     io,
@@ -50,8 +50,8 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     }
 }
 
-pub fn setup_terminal()
--> Result<Terminal<CrosstermBackend<std::io::Stdout>>, Box<dyn std::error::Error>> {
+pub fn setup_terminal(
+) -> Result<Terminal<CrosstermBackend<std::io::Stdout>>, Box<dyn std::error::Error>> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
@@ -69,9 +69,9 @@ pub fn restore_terminal(
 }
 
 pub fn update_copy_feedback(app: &mut App) {
-    if let Some(copy_instant) = app.copy_feedback
-        && Instant::now().duration_since(copy_instant).as_secs() >= 1
-    {
-        app.copy_feedback = None;
+    if let Some(copy_instant) = app.copy_feedback {
+        if Instant::now().duration_since(copy_instant).as_secs() >= 1 {
+            app.copy_feedback = None;
+        }
     }
 }
