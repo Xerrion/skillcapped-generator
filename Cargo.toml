@@ -21,10 +21,10 @@ name = "skillcapped_generator"
 path = "src/lib.rs"
 
 [dependencies]
+arboard = "3.6.0"
 base64 = "0.22.1"
 crossterm = "0.29.0"
-ratatui = "0.26.0"
-arboard = "3.4.0"
+ratatui = "0.29.0"
 
 [build-dependencies]
 winresource = "0.1"

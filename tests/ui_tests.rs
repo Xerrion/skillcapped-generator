@@ -1,5 +1,5 @@
-use skillcapped_generator::{app::App, ui::draw_ui};
 use ratatui::{backend::TestBackend, Terminal};
+use skillcapped_generator::{app::App, ui::draw_ui};
 use std::time::Instant;
 
 #[test]
@@ -79,17 +79,17 @@ fn test_draw_ui_large_terminal() {
 
 #[test]
 fn test_draw_ui_help_section() {
-    let backend = TestBackend::new(120, 30);  // Larger terminal
+    let backend = TestBackend::new(120, 30); // Larger terminal
     let mut terminal = Terminal::new(backend).unwrap();
     let app = App::new();
 
     let result = terminal.draw(|f| draw_ui(f, &app));
     assert!(result.is_ok());
-    
+
     // Test that the help section is rendered
     let buffer = terminal.backend().buffer();
     let buffer_text: String = buffer.content.iter().map(|cell| cell.symbol()).collect();
-    
+
     // Test for help-related content (the help section should contain these)
     assert!(buffer_text.contains("Help") || buffer_text.contains("Ctrl"));
 }

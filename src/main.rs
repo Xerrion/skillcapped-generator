@@ -1,9 +1,9 @@
 pub mod app;
-pub mod ui;
 pub mod input;
 pub mod terminal;
+pub mod ui;
 
-use terminal::{setup_terminal, restore_terminal, run_app};
+use terminal::{restore_terminal, run_app, setup_terminal};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut terminal = setup_terminal()?;

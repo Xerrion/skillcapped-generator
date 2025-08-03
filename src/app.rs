@@ -1,4 +1,4 @@
-use base64::{Engine as _, engine::general_purpose};
+use base64::{engine::general_purpose, Engine as _};
 use std::time::Instant;
 
 pub struct App {
@@ -48,34 +48,35 @@ impl App {
     }
 
     pub fn sanitize_input(&mut self) {
-        self.battlenet_id.retain(|c| c.is_ascii_alphanumeric() || c == '#');
+        self.battlenet_id
+            .retain(|c| c.is_ascii_alphanumeric() || c == '#');
     }
 
     pub fn is_valid_battlenet_id(&self) -> bool {
         if self.battlenet_id.is_empty() {
             return false;
         }
-        
+
         let parts: Vec<&str> = self.battlenet_id.split('#').collect();
         if parts.len() != 2 {
             return false;
         }
-        
+
         let name_part = parts[0];
         let number_part = parts[1];
-        
+
         // Name part must not be empty and contain only alphanumeric characters
         if name_part.is_empty() || !name_part.chars().all(|c| c.is_ascii_alphanumeric()) {
             return false;
         }
-        
+
         // Number part must be at least 4 digits long and contain only digits
         number_part.len() >= 4 && number_part.chars().all(|c| c.is_ascii_digit())
     }
 
     pub fn generate_code(&self) -> Result<String, String> {
         let addon_config = self.get_addon_config()?;
-        
+
         let mut input = self.battlenet_id.clone();
         if self.use_lowercase {
             input = input.to_lowercase();
@@ -90,17 +91,17 @@ impl App {
             Ok(decoded) => {
                 let battlenet_lower = self.battlenet_id.to_lowercase();
                 let decoded_lower = decoded.to_lowercase();
-                
+
                 let wa4_config = "ctdveirvrtdice";
                 let wa5_config = "vridtcetvrdice";
-                
+
                 let expected_combinations = vec![
                     format!("{}{}", battlenet_lower, wa4_config),
                     format!("{}{}", self.battlenet_id, wa4_config),
                     format!("{}{}", battlenet_lower, wa5_config),
                     format!("{}{}", self.battlenet_id, wa5_config),
                 ];
-                
+
                 for expected in expected_combinations {
                     if decoded_lower == expected.to_lowercase() || decoded == expected {
                         return true;
@@ -120,7 +121,8 @@ impl App {
     }
 
     fn decode_import_string(&self, encoded_string: &str) -> Result<String, String> {
-        let cleaned: String = encoded_string.chars()
+        let cleaned: String = encoded_string
+            .chars()
             .filter(|c| c.is_ascii_alphanumeric() || *c == '+' || *c == '/' || *c == '=')
             .collect();
 
@@ -132,15 +134,23 @@ impl App {
 
     pub fn get_wa_configs(&self) -> (String, String) {
         let wa4_part1: String = vec![99, 116, 100, 118, 101, 105]
-            .into_iter().map(|c| c as u8 as char).collect();
+            .into_iter()
+            .map(|c| c as u8 as char)
+            .collect();
         let wa4_part2: String = vec![114, 118, 114, 116, 105, 100, 99, 101]
-            .into_iter().map(|c| c as u8 as char).collect();
+            .into_iter()
+            .map(|c| c as u8 as char)
+            .collect();
         let wa4 = format!("{}{}", wa4_part1, wa4_part2);
 
         let wa5_part1: String = vec![118, 114, 105, 100, 116, 99]
-            .into_iter().map(|c| c as u8 as char).collect();
+            .into_iter()
+            .map(|c| c as u8 as char)
+            .collect();
         let wa5_part2: String = vec![101, 116, 118, 114, 100, 105, 99, 101]
-            .into_iter().map(|c| c as u8 as char).collect();
+            .into_iter()
+            .map(|c| c as u8 as char)
+            .collect();
         let wa5 = format!("{}{}", wa5_part1, wa5_part2);
 
         (wa4, wa5)

@@ -1,7 +1,7 @@
+use crate::app::App;
+use arboard::Clipboard;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::time::Instant;
-use arboard::Clipboard;
-use crate::app::App;
 
 pub fn handle_key_event(app: &mut App, key: KeyEvent) -> bool {
     match key.code {
@@ -38,8 +38,8 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent) -> bool {
 }
 
 fn has_modifiers(key: &KeyEvent) -> bool {
-    key.modifiers.contains(KeyModifiers::CONTROL) 
-        || key.modifiers.contains(KeyModifiers::ALT) 
+    key.modifiers.contains(KeyModifiers::CONTROL)
+        || key.modifiers.contains(KeyModifiers::ALT)
         || key.modifiers.contains(KeyModifiers::SUPER)
 }
 
@@ -60,12 +60,12 @@ fn handle_paste_battlenet_id(app: &mut App) {
         if let Ok(clipboard_text) = clipboard.get_text() {
             // Clear current input and set to clipboard content
             app.reset_input();
-            
+
             // Add each character from clipboard
             for c in clipboard_text.chars() {
                 app.add_char(c);
             }
-            
+
             // Sanitize the pasted input
             app.sanitize_input();
         }
@@ -74,25 +74,21 @@ fn handle_paste_battlenet_id(app: &mut App) {
 
 fn open_github_link() {
     let url = "https://github.com/Xerrion";
-    
+
     #[cfg(target_os = "windows")]
     {
         let _ = std::process::Command::new("cmd")
             .args(["/c", "start", url])
             .spawn();
     }
-    
+
     #[cfg(target_os = "macos")]
     {
-        let _ = std::process::Command::new("open")
-            .arg(url)
-            .spawn();
+        let _ = std::process::Command::new("open").arg(url).spawn();
     }
-    
+
     #[cfg(target_os = "linux")]
     {
-        let _ = std::process::Command::new("xdg-open")
-            .arg(url)
-            .spawn();
+        let _ = std::process::Command::new("xdg-open").arg(url).spawn();
     }
 }

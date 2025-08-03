@@ -1,12 +1,12 @@
+use crate::app::App;
 use ratatui::{
     layout::{Constraint, Direction, Layout},
-    style::{Modifier, Style, Color},
-    text::{Span, Line},
+    style::{Color, Modifier, Style},
+    text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
 use std::time::Duration;
-use crate::app::App;
 
 pub fn draw_ui(f: &mut Frame, app: &App) {
     let size = f.size();
@@ -42,14 +42,25 @@ fn draw_input_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     f.render_widget(
         Paragraph::new(Line::from(vec![
             Span::styled(status_emoji, Style::default()),
-            Span::styled(" Battle.net ID: ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                " Battle.net ID: ",
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled(input_text, input_style.add_modifier(Modifier::BOLD)),
         ]))
-        .block(Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(input_border_color))
-            .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
-            .title("💻 Input")),
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(input_border_color))
+                .title_style(
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .title("💻 Input"),
+        ),
         area,
     );
 }
@@ -63,12 +74,17 @@ fn draw_version_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     ]);
 
     f.render_widget(
-        Paragraph::new(version_line)
-            .block(Block::default()
+        Paragraph::new(version_line).block(
+            Block::default()
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Blue))
-                .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
-                .title("🎮 Version")),
+                .title_style(
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .title("🎮 Version"),
+        ),
         area,
     );
 }
@@ -77,19 +93,21 @@ fn draw_code_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     let (unlock_code, copy_title, code_color) = get_code_info(app);
 
     f.render_widget(
-        Paragraph::new(Line::from(vec![
-            Span::styled(
-                unlock_code,
-                Style::default()
-                    .fg(code_color)
-                    .add_modifier(Modifier::BOLD)
-            )
-        ]))
-        .block(Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(code_color))
-            .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
-            .title(copy_title)),
+        Paragraph::new(Line::from(vec![Span::styled(
+            unlock_code,
+            Style::default().fg(code_color).add_modifier(Modifier::BOLD),
+        )]))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(code_color))
+                .title_style(
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .title(copy_title),
+        ),
         area,
     );
 }
@@ -97,29 +115,59 @@ fn draw_code_section(f: &mut Frame, app: &App, area: ratatui::layout::Rect) {
 fn draw_help_section(f: &mut Frame, area: ratatui::layout::Rect) {
     let help_line = Line::from(vec![
         Span::styled("⌨️  ", Style::default().fg(Color::Yellow)),
-        Span::styled("Type/Paste: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "Type/Paste: ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Enter Battle.net ID", Style::default().fg(Color::Gray)),
         Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled("Esc: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "Esc: ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Clear", Style::default().fg(Color::Gray)),
         Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled("Ctrl+C: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "Ctrl+C: ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Copy", Style::default().fg(Color::Gray)),
         Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled("Ctrl+V: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "Ctrl+V: ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Paste", Style::default().fg(Color::Gray)),
         Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-        Span::styled("Ctrl+Q: ", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "Ctrl+Q: ",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Quit", Style::default().fg(Color::Gray)),
     ]);
 
     f.render_widget(
-        Paragraph::new(help_line)
-            .block(Block::default()
+        Paragraph::new(help_line).block(
+            Block::default()
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Yellow))
-                .title_style(Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))
-                .title("❓ Help")),
+                .title_style(
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .title("❓ Help"),
+        ),
         area,
     );
 }
@@ -128,17 +176,29 @@ fn draw_footer_section(f: &mut Frame, area: ratatui::layout::Rect) {
     f.render_widget(
         Paragraph::new(Line::from(vec![
             Span::styled("Made by ", Style::default().fg(Color::Gray)),
-            Span::styled("Xerrion", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "Xerrion",
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled(" | 🔗 ", Style::default().fg(Color::Gray)),
-            Span::styled("https://github.com/Xerrion", 
-                Style::default().fg(Color::Blue).add_modifier(Modifier::UNDERLINED).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "https://github.com/Xerrion",
+                Style::default()
+                    .fg(Color::Blue)
+                    .add_modifier(Modifier::UNDERLINED)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled(" (Ctrl+G to open)", Style::default().fg(Color::DarkGray)),
         ]))
-        .block(Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::DarkGray))
-            .title_style(Style::default().fg(Color::DarkGray))
-            .title("ℹ️  About")),
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(Color::DarkGray))
+                .title_style(Style::default().fg(Color::DarkGray))
+                .title("ℹ️  About"),
+        ),
         area,
     );
 }
@@ -160,18 +220,28 @@ fn create_version_span<'a>(name: &'a str, current_version: &str, version_key: &s
     } else {
         format!("  {}  ", name)
     };
-    
+
     Span::styled(
         text,
         Style::default()
-            .fg(if is_current { Color::Yellow } else { Color::Gray })
-            .add_modifier(if is_current { Modifier::BOLD } else { Modifier::empty() }),
+            .fg(if is_current {
+                Color::Yellow
+            } else {
+                Color::Gray
+            })
+            .add_modifier(if is_current {
+                Modifier::BOLD
+            } else {
+                Modifier::empty()
+            }),
     )
 }
 
 fn get_code_info(app: &App) -> (String, &'static str, Color) {
     if app.is_valid_battlenet_id() {
-        let code = app.generate_code().unwrap_or_else(|_| "Invalid version".to_string());
+        let code = app
+            .generate_code()
+            .unwrap_or_else(|_| "Invalid version".to_string());
         let title = if let Some(copy_time) = app.copy_feedback {
             if copy_time.elapsed() < Duration::from_secs(2) {
                 "🎉 Unlock Code (Copied to clipboard!)"
@@ -186,7 +256,7 @@ fn get_code_info(app: &App) -> (String, &'static str, Color) {
         (
             "⚠️  Enter a valid Battle.net ID to generate unlock code".to_string(),
             "🔑 Unlock Code",
-            Color::Yellow
+            Color::Yellow,
         )
     }
 }
